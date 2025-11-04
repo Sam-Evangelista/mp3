@@ -1,0 +1,50 @@
+
+//Tests for User API
+GET http://localhost:3000/api/users
+
+###
+GET http://localhost:3000/api/users/6909b64a36c68449d87089bc
+
+
+###
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "email": "test@gmail.com",
+    "pendingTasks": []
+}
+
+###
+DELETE http://localhost:3000/api/users/6909b6f336c68449d87089c0
+
+
+###
+PUT http://localhost:3000/api/users/6909b64a36c68449d87089bc
+Content-Type: application/json
+
+{
+    "name": "Test Four"
+}
+
+
+//Test for Task API
+###
+GET http://localhost:3000/api/tasks
+
+###
+GET http://localhost:3000/api/tasks/6909bdfca1c4848128ee505d
+
+###
+POST http://localhost:3000/api/tasks
+Content-Type: application/json
+
+{
+    "name": "Jake Doe",
+    "description": "five@gmail.com",
+    "deadline": "2024-12-31T23:59:59.999Z",
+    "completed": false,
+    "assignedUser": "6909b64a36c68449d87089bc",
+    "assignedUserName": "John Doe"
+}
