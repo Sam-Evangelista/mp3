@@ -78,7 +78,11 @@ module.exports = function (router) {
       const newUser = await user.save();
       return res.success(newUser, 'Created', 201);
     } catch (err) {
-      return res.fail(err.message, 400);
+      if (err && err.code === 11000) {
+        return res.fail('Email already exists', 400);
+      }
+
+      return res.fail('Invalid user data', 400);
     }
   });
 
@@ -93,18 +97,16 @@ module.exports = function (router) {
     }
   
     try {
-      // NOTE: call .exec() with parentheses
       const user = await User.findById(req.params.id).select(select).exec();
       if (!user) {
         return res.fail('Cannot find user', 404);
       }
-      return res.success(user); // ← send the response
+      return res.success(user);
     } catch (err) {
-      // Optional: nicer invalid ObjectId handling
       if (err.name === 'CastError') {
         return res.fail('Invalid ID', 400);
       }
-      return res.fail(err.message, 500);
+      return res.fail('Server error', 500);
     }
   });
 
@@ -117,7 +119,11 @@ module.exports = function (router) {
       const updatedUser = await res.user.save();
       return res.success(updatedUser);
     } catch (err) {
-      return res.fail(err.message, 400);
+      if (err && err.code === 11000) {
+        return res.fail('Email already exists', 400);
+      }
+
+      return res.fail('Invalid user update', 400);
     }
   });
 

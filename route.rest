@@ -3,10 +3,10 @@
 GET http://localhost:3000/api/users
 
 ###
-GET http://localhost:3000/api/users/690a2b955aa3ea1fd4d50e69
+GET http://localhost:3000/api/users/690a6ac06b502411047185d6
 
 ###
-GET http://localhost:3000/api/users?where={"_id": "690a2b955aa3ea1fd4d50e69"}	
+GET http://localhost:3000/api/users?where={"_id": "690a6ac06b502411047185d6"}	
 
 
 ###
@@ -15,7 +15,7 @@ Content-Type: application/json
 
 {
     "name": "Five",
-    "email": "test@gmail.com",
+    "email": "scott@baker.com",
     "pendingTasks": []
 }
 
@@ -24,7 +24,7 @@ DELETE http://localhost:3000/api/users/6909b6f336c68449d87089c0
 
 
 ###
-PUT http://localhost:3000/api/users/6909b64a36c68449d87089bc
+PUT http://localhost:3000/api/users/690a6ac06b502411047185d6
 Content-Type: application/json
 
 {
