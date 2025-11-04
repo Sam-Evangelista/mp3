@@ -3,7 +3,7 @@
 GET http://localhost:3000/api/users
 
 ###
-GET http://localhost:3000/api/users/6909b64a36c68449d87089bc
+GET http://localhost:3000/api/users/690a2b955aa3ea1fd4d50e5f
 
 
 ###
@@ -34,7 +34,13 @@ Content-Type: application/json
 GET http://localhost:3000/api/tasks
 
 ###
-GET http://localhost:3000/api/tasks/6909bdfca1c4848128ee505d
+GET http://localhost:3000/api/tasks/690a2b955aa3ea1fd4d50e87
+
+###
+GET http://localhost:3000/api/tasks?where={"_id": "690a2b955aa3ea1fd4d50e87"}	
+
+###
+GET http://localhost:3000/api/tasks?skip=5&limit=2
 
 ###
 POST http://localhost:3000/api/tasks
