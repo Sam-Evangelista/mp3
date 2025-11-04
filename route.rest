@@ -11,7 +11,7 @@ POST http://localhost:3000/api/users
 Content-Type: application/json
 
 {
-    "name": "John Doe",
+    "name": "Five",
     "email": "test@gmail.com",
     "pendingTasks": []
 }

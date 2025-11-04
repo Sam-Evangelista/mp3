@@ -43,7 +43,6 @@ module.exports = function (router) {
   });
 
   router.put('/:id', getUser, async (req, res) => {
-    // apply updates safely
     if (req.body.name != null) res.user.name = req.body.name;
     if (req.body.email != null) res.user.email = req.body.email;
     if (req.body.pendingTasks != null) res.user.pendingTasks = req.body.pendingTasks;
@@ -58,7 +57,7 @@ module.exports = function (router) {
 
   router.delete('/:id', getUser, async (req, res) => {
     try {
-      await res.user.deleteOne(); // remove() deprecated
+      await res.user.deleteOne();
       return res.success(null, 'Deleted');
     } catch (err) {
       return res.fail(err.message, 500);
