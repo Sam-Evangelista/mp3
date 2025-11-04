@@ -16,7 +16,51 @@ async function getUser(req, res, next) {
 module.exports = function (router) {
   router.get('/', async (req, res) => {
     try {
-      const users = await User.find();
+      let where = {};
+      let sort = {};
+      let select = {};
+
+      if (req.query.where) {
+        try {
+          where = JSON.parse(req.query.where);
+        } catch {
+          return res.fail('Invalid JSON in "where" query parameter', 400);
+        }
+      }
+
+      if (req.query.sort) {
+        try {
+          sort = JSON.parse(req.query.sort);
+        } catch {
+          return res.fail('Invalid JSON in "sort" query parameter', 400);
+        }
+      }
+
+      if (req.query.select) {
+        try {
+          select = JSON.parse(req.query.select);
+        } catch {
+          return res.fail('Invalid JSON in "select" query parameter', 400);
+        }
+      }
+
+      const skip = req.query.skip ? parseInt(req.query.skip, 10) : 0;
+
+      const limit = req.query.limit ? parseInt(req.query.limit, 10) : 0;
+      const count = req.query.count === 'true';
+
+      if (count) {
+        const userCount = await User.countDocuments(where);
+        return res.success(userCount);
+      }
+
+      let query = User.find(where).sort(sort).select(select).skip(skip);
+
+      if (limit > 0) {
+        query = query.limit(limit);
+      }
+
+      const users = await query.exec();
       return res.success(users);
     } catch (err) {
       return res.fail(err.message, 500);
@@ -38,8 +82,30 @@ module.exports = function (router) {
     }
   });
 
-  router.get('/:id', getUser, (req, res) => {
-    return res.success(res.user);
+  router.get('/:id', async (req, res) => {
+    let select = {};
+    if (req.query.select) {
+      try {
+        select = JSON.parse(req.query.select);
+      } catch {
+        return res.fail('Invalid JSON in "select" query parameter', 400);
+      }
+    }
+  
+    try {
+      // NOTE: call .exec() with parentheses
+      const user = await User.findById(req.params.id).select(select).exec();
+      if (!user) {
+        return res.fail('Cannot find user', 404);
+      }
+      return res.success(user); // ← send the response
+    } catch (err) {
+      // Optional: nicer invalid ObjectId handling
+      if (err.name === 'CastError') {
+        return res.fail('Invalid ID', 400);
+      }
+      return res.fail(err.message, 500);
+    }
   });
 
   router.put('/:id', getUser, async (req, res) => {

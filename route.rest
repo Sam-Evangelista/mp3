@@ -3,7 +3,10 @@
 GET http://localhost:3000/api/users
 
 ###
-GET http://localhost:3000/api/users/690a2b955aa3ea1fd4d50e5f
+GET http://localhost:3000/api/users/690a2b955aa3ea1fd4d50e69
+
+###
+GET http://localhost:3000/api/users?where={"_id": "690a2b955aa3ea1fd4d50e69"}	
 
 
 ###
