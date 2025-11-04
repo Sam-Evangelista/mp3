@@ -31,6 +31,8 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+app.use(require('./middleware/responseHelper'));
+
 // Use routes as a module (see index.js)
 require('./routes')(app, router);
 

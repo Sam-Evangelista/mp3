@@ -4,10 +4,10 @@ async function getTask(req, res, next) {
     try {
         task = await Task.findById(req.params.id);
         if (task == null) {
-            return res.status(404).json({ message: 'Cannot find task' });
+            return res.fail('Cannot find task', 404);
         }
     } catch (err) {
-        return res.status(500).json({ message: err.message });
+        return res.fail(err.message, 500);
     }
     res.task = task;
     next();
@@ -17,9 +17,9 @@ module.exports = function (router) {
     router.get('/', async (req, res) => {
         try {
             const tasks = await Task.find();
-            res.json(tasks);
+            return res.success(tasks);
         } catch (err) {
-            res.status(500).json({ message: err.message });
+            return res.fail(err.message, 500);
         }
     });
 
@@ -36,14 +36,14 @@ module.exports = function (router) {
 
         try {
             const newTask = await task.save();
-            res.status(201).json(newTask);
+            return res.success(newTask, 'Created', 201);
         } catch (err) {
-            res.status(400).json({ message: err.message });
+            return res.fail(err.message, 400);
         }
     });
 
     router.get('/:id', getTask, (req, res) => {
-        res.json(res.task);
+        return res.success(res.task);
     });
 
     router.put('/:id', getTask, async (req, res) => {
@@ -68,18 +68,18 @@ module.exports = function (router) {
 
         try {
             const updatedTask = await res.task.save();
-            res.json(updatedTask);
+            return res.success(updatedTask);
         } catch (err) {
-            res.status(400).json({ message: err.message });
+            return res.fail(err.message, 400);
         }
     });
 
     router.delete('/:id', getTask, async (req, res) => {
         try {
             await res.task.remove();
-            res.json({ message: 'Deleted Task' });
+            return res.success(null, 'Deleted');
         } catch (err) {
-            res.status(500).json({ message: err.message });
+            return res.fail(err.message, 500);
         }
     });
 

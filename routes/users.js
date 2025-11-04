@@ -2,29 +2,26 @@ const User = require('../models/user');
 
 async function getUser(req, res, next) {
   try {
-    user = await User.findById(req.params.id);
-    if (user == null) {
-      return res.status(404).json({message: 'Cannot find user'});
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.fail('Cannot find user', 404);
     }
+    res.user = user;
+    next();
   } catch (err) {
-    return res.status(500).json({message: err.message});
+    return res.fail(err.message, 500);
   }
-
-  res.user = user;
-  next();
 }
-
 
 module.exports = function (router) {
   router.get('/', async (req, res) => {
     try {
       const users = await User.find();
-      res.json(users);
+      return res.success(users);
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      return res.fail(err.message, 500);
     }
-
-  })
+  });
 
   router.post('/', async (req, res) => {
     const user = new User({
@@ -35,42 +32,36 @@ module.exports = function (router) {
 
     try {
       const newUser = await user.save();
-      res.status(201).json(newUser);
+      return res.success(newUser, 'Created', 201);
     } catch (err) {
-      res.status(400).json({ message: err.message });
+      return res.fail(err.message, 400);
     }
-  })
-  
-  router.get('/:id', getUser, (req, res) => {
-    res.json(res.user);
-  }); 
+  });
 
-  router.put('/:id', getUser, async(req, res) => {
-    if (req.body.name != null) {
-      res.user.name = req.body.name;
-    }
-    if (req.body.email != null) {
-      res.user.email = req.body.email;
-    }
-    if (req.body.pendingTasks != null) {
-      res.user.pendingTasks = req.body.pendingTasks;
-    }
+  router.get('/:id', getUser, (req, res) => {
+    return res.success(res.user);
+  });
+
+  router.put('/:id', getUser, async (req, res) => {
+    // apply updates safely
+    if (req.body.name != null) res.user.name = req.body.name;
+    if (req.body.email != null) res.user.email = req.body.email;
+    if (req.body.pendingTasks != null) res.user.pendingTasks = req.body.pendingTasks;
 
     try {
       const updatedUser = await res.user.save();
-      return res.json(updatedUser);
-    } catch(err) {
-      return res.status(400).json({ message: err.message });
+      return res.success(updatedUser);
+    } catch (err) {
+      return res.fail(err.message, 400);
     }
-    
   });
 
   router.delete('/:id', getUser, async (req, res) => {
     try {
-      await res.user.remove();
-      res.json({ message: 'Deleted User' });
+      await res.user.deleteOne(); // remove() deprecated
+      return res.success(null, 'Deleted');
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      return res.fail(err.message, 500);
     }
   });
 
