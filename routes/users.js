@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const Task = require('../models/task');
 
 async function getUser(req, res, next) {
   try {
@@ -9,6 +10,9 @@ async function getUser(req, res, next) {
     res.user = user;
     next();
   } catch (err) {
+    if (err && err.name === 'CastError') {
+      return res.fail('Invalid ID', 400);
+    }
     return res.fail(err.message, 500);
   }
 }
@@ -63,7 +67,7 @@ module.exports = function (router) {
       const users = await query.exec();
       return res.success(users);
     } catch (err) {
-      return res.fail(err.message, 500);
+      return res.fail('Server error', 500);
     }
   });
 
@@ -74,12 +78,16 @@ module.exports = function (router) {
       pendingTasks: req.body.pendingTasks
     });
 
+    if (!user.name || !user.email) {
+      return res.fail('Name and email are required', 400);
+    }
+
     try {
       const newUser = await user.save();
       return res.success(newUser, 'Created', 201);
     } catch (err) {
       if (err && err.code === 11000) {
-        return res.fail('Email already exists', 400);
+        return res.fail('Email already exists', 409);
       }
 
       return res.fail('Invalid user data', 400);
@@ -111,28 +119,58 @@ module.exports = function (router) {
   });
 
   router.put('/:id', getUser, async (req, res) => {
-    if (req.body.name != null) res.user.name = req.body.name;
-    if (req.body.email != null) res.user.email = req.body.email;
-    if (req.body.pendingTasks != null) res.user.pendingTasks = req.body.pendingTasks;
-
     try {
-      const updatedUser = await res.user.save();
-      return res.success(updatedUser);
-    } catch (err) {
-      if (err && err.code === 11000) {
-        return res.fail('Email already exists', 400);
+      if (req.body.name != null)  res.user.name  = req.body.name;
+      if (req.body.email != null) res.user.email = req.body.email;
+
+      if (Array.isArray(req.body.pendingTasks)) {
+        const desired = req.body.pendingTasks.map(String);
+        const userIdStr = String(res.user._id);
+
+        const currentTaskIds = (await Task.find({ assignedUser: userIdStr }).select('_id').exec())
+          .map(t => String(t._id));
+
+        const toAdd = desired.filter(id => !currentTaskIds.includes(id));
+        const toRemove = currentTaskIds.filter(id => !desired.includes(id));
+
+        if (toAdd.length) {
+          await Task.updateMany(
+            { _id: { $in: toAdd } },
+            { $set: { assignedUser: userIdStr, assignedUserName: res.user.name } }
+          );
+        }
+
+        if (toRemove.length) {
+          await Task.updateMany(
+            { _id: { $in: toRemove }, assignedUser: userIdStr },
+            { $set: { assignedUser: '', assignedUserName: 'unassigned' } }
+          );
+        }
+        res.user.pendingTasks = desired;
       }
 
+      const updated = await res.user.save();
+      return res.success(updated);
+    } catch (err) {
+      if (err && err.code === 11000) return res.fail('Email already in use', 409);
+      if (err && err.name === 'CastError') return res.fail('Invalid ID', 400);
       return res.fail('Invalid user update', 400);
     }
   });
 
   router.delete('/:id', getUser, async (req, res) => {
     try {
+      const userId = res.user._id.toString();
+     
+      await Task.updateMany(
+        { assignedUser: userId },
+        { $set: { assignedUser: '', assignedUserName: 'unassigned' } }
+      );
+
       await res.user.deleteOne();
       return res.success(null, 'Deleted');
     } catch (err) {
-      return res.fail(err.message, 500);
+      return res.fail('Server error', 500);
     }
   });
 

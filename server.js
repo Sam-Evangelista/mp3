@@ -16,7 +16,6 @@ var port = process.env.PORT || 3000;
 // Connect to a MongoDB --> Uncomment this once you have a connection string!!
 mongoose.connect(process.env.MONGODB_URI,  { useNewUrlParser: true });
 
-// // after mongoose.connect(...)
 // const User = require('./models/user');
 // User.syncIndexes().then(() => console.log('User indexes synced'));
 
