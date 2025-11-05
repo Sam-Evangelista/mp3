@@ -24,7 +24,7 @@ DELETE http://localhost:3000/api/users/6909b6f336c68449d87089c0
 
 
 ###
-PUT http://localhost:3000/api/users/690a6ac06b502411047185d6
+PUT http://localhost:3000/api/users/690a875f29b0e7439820cd10
 Content-Type: application/json
 
 {

@@ -13,7 +13,7 @@ async function getUser(req, res, next) {
     if (err && err.name === 'CastError') {
       return res.fail('Invalid ID', 400);
     }
-    return res.fail(err.message, 500);
+    return res.fail('Server Error', 500);
   }
 }
 
