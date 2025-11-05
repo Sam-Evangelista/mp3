@@ -75,7 +75,7 @@ module.exports = function (router) {
             const newTask = await task.save();
             return res.success(newTask, 'Created', 201);
         } catch (err) {
-            return res.fail(err.message, 400);
+            return res.fail('Invalid task data', 400);
         }
     });
 
